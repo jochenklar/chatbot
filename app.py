@@ -1,4 +1,3 @@
-import json
 import logging
 import sys
 from pathlib import Path
@@ -16,7 +15,8 @@ except ModuleNotFoundError:
     sys.exit(1)
 
 context = []
-for file_path in Path('context').iterdir():
+for file_path in Path("context").iterdir():
+    logger.info("Loading %s", file_path)
     context.append(file_path.read_text())
 
 
