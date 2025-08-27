@@ -1,0 +1,5 @@
+chainlit~=2.5.5
+
+langchain
+langchain-openai
+langchain-ollama
