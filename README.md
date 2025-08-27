@@ -29,9 +29,7 @@ SYSTEM_PROMPT = '''
 You are a helpful assistant who answers questions about small puppies.
 '''
 
-CONTEXT_PATH = 'context.json'
-
-STREAM = True
+STREAM_RESPONSE = True
 
 STARTERS = [
     {
@@ -41,7 +39,7 @@ STARTERS = [
         {
         'label': '',
         'message': ''
-    },
+    }
 ]
 ```
 

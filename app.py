@@ -56,7 +56,7 @@ async def on_message(message):
     }
 
     response_content = ""
-    if config.STREAM:
+    if config.STREAM_RESPONSE:
         response_message = cl.Message(content="")
         await response_message.send()
 
