@@ -11,7 +11,7 @@ Install the prerequisites, preferebly in a virtual environment:
 
 ```bash
 pip install .[openai]
-pip install .[ollama]  # alternatively 
+pip install .[ollama]  # alternatively
 ```
 
 Create a `config.py` file, which looks like this:

@@ -1,6 +1,7 @@
 import json
 import logging
 import sys
+from pathlib import Path
 
 import chainlit as cl
 from langchain_core.messages import AIMessage, AIMessageChunk, HumanMessage
@@ -13,6 +14,10 @@ try:
 except ModuleNotFoundError:
     logger.error("config.py not found")
     sys.exit(1)
+
+context = []
+for file_path in Path('context').iterdir():
+    context.append(file_path.read_text())
 
 
 @cl.on_chat_start
@@ -35,22 +40,17 @@ async def on_chat_start():
 
     chain = prompt | llm
 
-    with open(config.CONTEXT_PATH) as fp:
-        context = json.load(fp)
-
     cl.user_session.set("chain", chain)
-    cl.user_session.set("context", context)
 
 
 @cl.on_message
 async def on_message(message):
     chain = cl.user_session.get("chain")
     history = cl.user_session.get("history", [])
-    context = cl.user_session.get("context", {})
 
     inputs = {
         "system_prompt": config.SYSTEM_PROMPT,
-        "context": context,
+        "context": "\n\n".join(context),
         "history": history,
         "content": message.content
     }

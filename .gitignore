@@ -12,8 +12,9 @@ __pycache__/
 
 chainlit.md
 config.py
-context.json
-public
+
+/public
+/context
 
 /env
 
