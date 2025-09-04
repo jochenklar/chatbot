@@ -1,4 +1,4 @@
 serve:
-	chainlit run --watch app.py
+	chainlit run --watch --headless app.py
 
 .PHONY: serve

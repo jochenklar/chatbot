@@ -10,9 +10,8 @@ __pycache__/
 .env
 .chainlit
 
+config.yaml
 chainlit.md
-config.py
-
 /public
 /context
 

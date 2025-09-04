@@ -27,9 +27,11 @@ dependencies = [
 
 [project.optional-dependencies]
 openai = [
+  "langchain",
   "langchain-openai",
 ]
 ollama = [
+  "langchain",
   "langchain-ollama",
 ]
 dev = [
