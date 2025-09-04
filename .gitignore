@@ -14,6 +14,7 @@ config.yaml
 chainlit.md
 /public
 /context
+/store
 
 /env
 

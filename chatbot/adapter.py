@@ -1,4 +1,5 @@
 import importlib
+from pathlib import Path
 
 import chainlit as cl
 from langchain_core.messages import AIMessage, AIMessageChunk, HumanMessage
@@ -34,10 +35,10 @@ class LangChainAdapter(Adapter):
     def init_prompt(self):
         return ChatPromptTemplate.from_messages(
             [
-                ("system", "{system_prompt}"),
-                ("system", "{context}"),
+                ("system", settings.SYSTEM_TEMPLATE),
+                ("system", settings.CONTEXT_TEMPLATE),
                 MessagesPlaceholder(variable_name="history"),
-                ("user", "{content}")
+                ("user", settings.USER_TEMPLATE)
             ]
         )
 
@@ -47,34 +48,43 @@ class LangChainAdapter(Adapter):
     def init_chain(self):
         return self.init_prompt() | self.init_llm()
 
-    def get_context(self):
-        return ""
+    def update_history(self, history, message_content, response_content):
+        history.append(HumanMessage(content=message_content))
+        history.append(AIMessage(content=response_content))
+        cl.user_session.set("history", history)
 
     async def on_chat_start(self):
         cl.user_session.set("chain", self.init_chain())
 
     async def on_message(self, message):
-        chain = cl.user_session.get("chain")
         history = cl.user_session.get("history", [])
-        context = self.get_context()
+        context = await self.fetch_context(message)
 
         inputs = {
-            "system_prompt": settings.SYSTEM_PROMPT,
             "context": context,
             "history": history,
             "content": message.content
         }
 
-        response_content = await self.run_chain(chain, inputs)
+        response_content = await self.run_chain(inputs)
 
-        # add messages to history
-        cl.user_session.set("history", [
-            *history,
-            HumanMessage(content=message.content),
-            AIMessage(content=response_content)
-        ])
+        self.update_history(history, message.content, response_content)
 
-    async def run_chain(self, chain, inputs):
+    async def fetch_context(self, message):
+        context = cl.user_session.get("context", "")
+
+        if not context and hasattr(settings, "CONTEXT_PATH"):
+            context = "\n\n".join([
+                file_path.read_text()
+                for file_path in Path(settings.CONTEXT_PATH).rglob("*")
+            ])
+            cl.user_session.set("context", context)
+
+        return context
+
+    async def run_chain(self, inputs):
+        chain = cl.user_session.get("chain")
+
         response_content = ""
         if settings.STREAM_RESPONSE:
             response_message = cl.Message(content="")
@@ -108,7 +118,6 @@ class OpenAILangChainAdapter(LangChainAdapter):
 
 class OllamaLangChainAdapter(LangChainAdapter):
 
-    @property
     def init_llm(self):
         from langchain_ollama import ChatOllama
         return ChatOllama(**settings.LLM)
